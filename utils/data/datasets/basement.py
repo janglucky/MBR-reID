@@ -1,3 +1,4 @@
+#-*- coding:UTF-8 -*-
 from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import division
@@ -9,10 +10,9 @@ import numpy as np
 import tarfile
 import zipfile
 import copy
-
 import torch
 
-from torchreid.utils import read_image, mkdir_if_missing, download_url
+from utils.assist import read_image, mkdir_if_missing, download_url
 
 
 class Dataset(object):
@@ -83,22 +83,13 @@ class Dataset(object):
         #    if it was True for a specific dataset, setting it to True will
         #    create new IDs that should have been included
         ###################################
-        if isinstance(train[0][0], str):
-            return ImageDataset(
-                train, self.query, self.gallery,
-                transform=self.transform,
-                mode=self.mode,
-                combineall=False,
-                verbose=False
-            )
-        else:
-            return VideoDataset(
-                train, self.query, self.gallery,
-                transform=self.transform,
-                mode=self.mode,
-                combineall=False,
-                verbose=False
-            )
+        return ImageDataset(
+            train, self.query, self.gallery,
+            transform=self.transform,
+            mode=self.mode,
+            combineall=False,
+            verbose=False)
+
 
     def __radd__(self, other):
         """Supports sum([dataset1, dataset2, dataset3])."""
@@ -114,7 +105,7 @@ class Dataset(object):
         Args:
             data (list): contains tuples of (img_path(s), pid, camid)
         """
-        pids = set()
+        pids = set() # 无序不重复元素集
         cams = set()
         for _, pid, camid in data:
             pids.add(pid)
@@ -261,3 +252,4 @@ class ImageDataset(Dataset):
         print('  query    | {:5d} | {:8d} | {:9d}'.format(num_query_pids, len(self.query), num_query_cams))
         print('  gallery  | {:5d} | {:8d} | {:9d}'.format(num_gallery_pids, len(self.gallery), num_gallery_cams))
         print('  ----------------------------------------')
+
