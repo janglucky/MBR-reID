@@ -5,6 +5,10 @@ from yacs.config import CfgNode as CN
 def get_default_config():
     cfg = CN()
 
+
+    # gpu
+    cfg.use_gpu = False
+
     # model
     cfg.model = CN()
     cfg.model.name = 'resnet50'
@@ -16,8 +20,8 @@ def get_default_config():
     cfg.data = CN()
     cfg.data.type = 'image'
     cfg.data.root = 'F:\\行人重识别\\datasets\\'
-    cfg.data.sources = ['cuhk01']
-    cfg.data.targets = ['cuhk01']
+    cfg.data.sources = ['market1501']
+    cfg.data.targets = ['market1501']
     cfg.data.workers = 4  # number of data loading workers
     cfg.data.split_id = 0  # split index
     cfg.data.height = 256  # image height
