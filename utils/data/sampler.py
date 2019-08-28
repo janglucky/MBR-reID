@@ -1,4 +1,3 @@
-# compatible with python3.x
 from __future__ import absolute_import
 from __future__ import division
 
@@ -8,33 +7,29 @@ import copy
 import random
 
 import torch
-from torch.utils.data.sampler import Sampler, RandomSampler
+from torch.utils.data.sampler import Sampler
 
 
 class RandomIdentitySampler(Sampler):
-    """Randomly samples N identities each with K instances.
-
+    """
+    Randomly sample N identities, then for each identity,
+    randomly sample K instances, therefore batch size is N*K.
     Args:
-        data_source (list): contains tuples of (img_path(s), pid, camid).
-        batch_size (int): batch size.
-        num_instances (int): number of instances per identity in a batch.
+    - data_source (Dataset): dataset to sample from.
+    - num_instances (int): number of instances per identity in a batch.
+    - batch_size (int): number of examples in a batch.
     """
     def __init__(self, data_source, batch_size, num_instances):
-        if batch_size < num_instances:
-            raise ValueError('batch_size={} must be no less '
-                             'than num_instances={}'.format(batch_size, num_instances))
-
         self.data_source = data_source
         self.batch_size = batch_size
         self.num_instances = num_instances
         self.num_pids_per_batch = self.batch_size // self.num_instances
         self.index_dic = defaultdict(list)
-        for index, (_, pid, _) in enumerate(self.data_source):
+        for index, (_, pid) in enumerate(self.data_source):
             self.index_dic[pid].append(index)
         self.pids = list(self.index_dic.keys())
 
         # estimate number of examples in an epoch
-        # TODO: improve precision
         self.length = 0
         for pid in self.pids:
             idxs = self.index_dic[pid]
@@ -44,6 +39,7 @@ class RandomIdentitySampler(Sampler):
             self.length += num - num % self.num_instances
 
     def __iter__(self):
+
         batch_idxs_dict = defaultdict(list)
 
         for pid in self.pids:

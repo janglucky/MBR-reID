@@ -28,8 +28,8 @@ class DataManager(object):
 
     def __init__(self, sources=None, targets=None, height=256, width=128, transforms='random_flip',
                  norm_mean=None, norm_std=None, use_gpu=False):
-        self.sources = sources
-        self.targets = targets
+        self.sources = sources # 训练数据
+        self.targets = targets # 测试目标，一般保持和训练数据一致，也就是不做迁移
         self.height = height
         self.width = width
 
@@ -120,7 +120,7 @@ class ImageDataManager(DataManager):
     """
     data_type = 'image'
 
-    def __init__(self, root='', sources=None, targets=None, height=256, width=128, transforms='random_flip',
+    def __init__(self, root='',densepose='', sources=None, targets=None, height=256, width=128, transforms='random_flip',
                  norm_mean=None, norm_std=None, use_gpu=True, split_id=0, combineall=False,
                  batch_size_train=32, batch_size_test=32, workers=4, num_instances=4, train_sampler='',
                  cuhk03_labeled=False, cuhk03_classic_split=False, market1501_500k=False):
@@ -131,13 +131,14 @@ class ImageDataManager(DataManager):
         
         print('=> Loading train (source) dataset')
         trainset = []  
-        for name in self.sources:
+        for name in self.sources: #如果训练集由多个数据集组成，则合并这些数据集
             trainset_ = init_image_dataset(
                 name,
                 transform=self.transform_tr,
                 mode='train',
                 combineall=combineall,
                 root=root,
+                densepose=densepose,
                 split_id=split_id,
                 cuhk03_labeled=cuhk03_labeled,
                 cuhk03_classic_split=cuhk03_classic_split,

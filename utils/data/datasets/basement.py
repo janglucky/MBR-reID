@@ -164,7 +164,6 @@ class Dataset(object):
                                'prepared, please follow the '
                                'document to prepare this dataset'.format(self.__class__.__name__))
 
-        print('Creating directory "{}"'.format(dataset_dir))
         mkdir_if_missing(dataset_dir)
         fpath = osp.join(dataset_dir, osp.basename(dataset_url))
 
@@ -173,14 +172,21 @@ class Dataset(object):
 
         print('Extracting "{}"'.format(fpath))
         extension = osp.basename(fpath).split('.')[-1]
+
+
+
         try:
-            tar = tarfile.open(fpath)
-            tar.extractall(path=dataset_dir)
-            tar.close()
+            if extension == 'tar':
+                tar = tarfile.open(fpath)
+                tar.extractall(path=dataset_dir)
+                tar.close()
+            elif extension == 'zip':
+                zip_ref = zipfile.ZipFile(fpath, 'r')
+                zip_ref.extractall(dataset_dir)
+                zip_ref.close()
         except:
-            zip_ref = zipfile.ZipFile(fpath, 'r')
-            zip_ref.extractall(dataset_dir)
-            zip_ref.close()
+            raise Exception('ReadError:Expect file end with .tar or .zip,but found file {} end with {}'.format(fpath,extension))
+            
 
         print('{} dataset is ready'.format(self.__class__.__name__))
 
@@ -233,8 +239,10 @@ class ImageDataset(Dataset):
         super(ImageDataset, self).__init__(train, query, gallery, **kwargs)
 
     def __getitem__(self, index):
+        
         img_path, pid, camid = self.data[index]
         img = read_image(img_path)
+
         if self.transform is not None:
             img = self.transform(img)
         return img, pid, camid, img_path

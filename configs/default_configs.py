@@ -20,6 +20,7 @@ def get_default_config():
     cfg.data = CN()
     cfg.data.type = 'image'
     cfg.data.root = 'E:\\reid'
+    cfg.data.densepose = 'E:\\reid\\DensePoseData'
     cfg.data.sources = ['market1501']
     cfg.data.targets = ['market1501']
     cfg.data.workers = 4  # number of data loading workers
@@ -105,6 +106,7 @@ def get_default_config():
 def imagedata_kwargs(cfg):
     return {
         'root': cfg.data.root,
+        'densepose': cfg.data.densepose,
         'sources': cfg.data.sources,
         'targets': cfg.data.targets,
         'height': cfg.data.height,
