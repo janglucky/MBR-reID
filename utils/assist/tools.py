@@ -73,17 +73,24 @@ def download_url(url, dst):
         url (str): url to download file.
         dst (str): destination path.
     """
+
     from six.moves import urllib
     print('* url="{}"'.format(url))
     print('* destination="{}"'.format(dst))
+
+
+    if osp.exists(dst):
+        print('* reading cache file : {}'.format(dst))
+        return
 
     def _reporthook(count, block_size, total_size):
         global start_time
         if count == 0:
             start_time = time.time()
             return
-        duration = time.time() - start_time
+        duration = float(time.time() - start_time)
         progress_size = int(count * block_size)
+        print(duration)
         speed = int(progress_size / (1024 * duration))
         percent = int(count * block_size * 100 / total_size)
         sys.stdout.write('\r...%d%%, %d MB, %d KB/s, %d seconds passed' %
@@ -111,7 +118,7 @@ def read_image(path):
             img = Image.open(path).convert('RGB')
             got_img = True
         except IOError:
-            print('IOError incurred when reading "{}". Will redo. Don\'t worry. Just chill.'.format(img_path))
+            print('IOError incurred when reading "{}". Will redo. Don\'t worry. Just chill.'.format(path))
             pass
     return img
 

@@ -19,7 +19,7 @@ def get_default_config():
     # data
     cfg.data = CN()
     cfg.data.type = 'image'
-    cfg.data.root = 'F:\\行人重识别\\datasets\\'
+    cfg.data.root = 'E:\\reid'
     cfg.data.sources = ['market1501']
     cfg.data.targets = ['market1501']
     cfg.data.workers = 4  # number of data loading workers
