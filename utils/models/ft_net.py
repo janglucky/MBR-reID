@@ -62,10 +62,10 @@ class ClassBlock(nn.Module):
             return x
 
 # Define the ResNet50-based Model
-class ft_net(nn.Module):
+class framework(nn.Module):
 
-    def __init__(self, class_num, droprate=0.5, stride=2):
-        super(ft_net, self).__init__()
+    def __init__(self, num_classes, droprate=0.5, stride=2):
+        super(framework, self).__init__()
         model_ft = models.resnet50(pretrained=True)
         # avg pooling to global pooling
         if stride == 1:
@@ -73,7 +73,7 @@ class ft_net(nn.Module):
             model_ft.layer4[0].conv2.stride = (1,1)
         model_ft.avgpool = nn.AdaptiveAvgPool2d((1,1))
         self.model = model_ft
-        self.classifier = ClassBlock(2048, class_num, droprate)
+        self.classifier = ClassBlock(2048, num_classes, droprate)
 
     def forward(self, x):
         x = self.model.conv1(x)
@@ -88,3 +88,7 @@ class ft_net(nn.Module):
         x = x.view(x.size(0), x.size(1))
         x = self.classifier(x)
         return x
+
+def ft_net(num_classes,loss,pretrained=True,**kwargs):
+	model = framework(num_classes=num_classes)
+	return model

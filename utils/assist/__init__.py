@@ -4,3 +4,4 @@ from .tools import *
 from .avgmeter import *
 from .model_complexity import compute_model_complexity
 from .loggers import *
+from .model_tools import *

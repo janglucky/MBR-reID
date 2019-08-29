@@ -9,6 +9,13 @@ import torch
 
 from utils.engine import engine
 
+from utils.engine import engine
+from utils.losses import CrossEntropyLoss
+from utils.assist import AverageMeter, open_specified_layers, open_all_layers
+from utils import metrics
+
+from utils.assist import AverageMeter
+
 
 class SeNetEngine(engine.Engine):
     r"""Softmax-loss engine for image-reid.
@@ -59,9 +66,10 @@ class SeNetEngine(engine.Engine):
     """
 
     def __init__(self, datamanager, model, optimizer, scheduler=None, use_gpu=True,
-                 label_smooth=True):
+                 label_smooth=False):
         super(SeNetEngine, self).__init__(datamanager, model, optimizer, scheduler, use_gpu)
-        
+
+        print('##########in engine',label_smooth)
         self.criterion = CrossEntropyLoss(
             num_classes=self.datamanager.num_train_pids,
             use_gpu=self.use_gpu,
@@ -86,7 +94,8 @@ class SeNetEngine(engine.Engine):
         for batch_idx, data in enumerate(trainloader):
             data_time.update(time.time() - end)
 
-            imgs, pids = self._parse_data_for_train(data)
+            imgs, pids, densepose = self._parse_data_for_train(data)
+
             if self.use_gpu:
                 imgs = imgs.cuda()
                 pids = pids.cuda()

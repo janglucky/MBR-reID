@@ -15,10 +15,10 @@ import torch
 import torch.nn as nn
 from torch.nn import functional as F
 import torchvision
-from torch.utils.tensorboard import SummaryWriter
 
-from utils.assist import AverageMeter, visualize_ranked_results, save_checkpoint, re_ranking, mkdir_if_missing
-from utils.losses import DeepSupervision
+from tensorboardX import SummaryWriter
+
+from utils.assist import AverageMeter, mkdir_if_missing
 from utils import metrics
 
 
@@ -400,8 +400,8 @@ class Engine(object):
     def _parse_data_for_train(self, data):
         imgs = data[0]
         pids = data[1]
-        uv_map = data[3]
-        return imgs, pids, uv_map
+        densepose = data[4]
+        return imgs, pids, densepose
 
     def _parse_data_for_eval(self, data):
         imgs = data[0]

@@ -1,0 +1,2 @@
+from .cross_entropy_loss import CrossEntropyLoss
+from .hard_mine_triplet_loss import TripletLoss

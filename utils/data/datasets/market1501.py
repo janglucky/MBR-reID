@@ -122,18 +122,14 @@ class Market1501(ImageDataset):
             if relabel:
                 pid = pid2label[pid]
 
-
-            #To do
-
             if densepose == '':
-
-                data.append((img_path, pid, camid,densepose))
+                data.append((img_path, pid, camid, densepose))
 
             else:
                 filename = osp.basename(img_path)
 
                 if osp.exists(osp.join(densepose,filename)):                    
-                    data.append((img_path, pid, camid,osp.join(densepose,filename)))
+                    data.append((img_path, pid, camid, osp.join(densepose,filename)))
                 else:
                     continue
 

@@ -11,7 +11,7 @@ def get_default_config():
 
     # model
     cfg.model = CN()
-    cfg.model.name = 'tf_net'
+    cfg.model.name = 'ft_net'
     cfg.model.pretrained = True  # automatically load pretrained model weights if available
     cfg.model.load_weights = ''  # path to model weights
     cfg.model.resume = ''  # path to checkpoint for resume training
@@ -19,8 +19,8 @@ def get_default_config():
     # data
     cfg.data = CN()
     cfg.data.type = 'image'
-    cfg.data.root = 'E:\\reid'
-    cfg.data.densepose = 'E:\\reid\\DensePoseData'
+    cfg.data.root = '/home/jy/datasets'
+    cfg.data.densepose = '/home/jy/datasets/DensePoseData'
     cfg.data.sources = ['market1501']
     cfg.data.targets = ['market1501']
     cfg.data.workers = 4  # number of data loading workers
@@ -149,8 +149,7 @@ def lr_scheduler_kwargs(cfg):
     return {
         'lr_scheduler': cfg.train.lr_scheduler,
         'stepsize': cfg.train.stepsize,
-        'gamma': cfg.train.gamma,
-        'max_epoch': cfg.train.max_epoch
+        'gamma': cfg.train.gamma
     }
 
 

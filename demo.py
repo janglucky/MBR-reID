@@ -8,25 +8,28 @@ import argparse
 import torch
 import torch.nn as nn
 
+import utils
+
+
 from configs.default_configs import (
     get_default_config, imagedata_kwargs,
     optimizer_kwargs, lr_scheduler_kwargs, engine_run_kwargs
 )
 
 from utils.assist import (
-	set_random_seed, compute_model_complexity, Logger,
-	collect_env_info
+	set_random_seed, compute_model_complexity,
+    Logger, check_isfile, collect_env_info
 )
 
 def build_datamanager(cfg):
 
-	return torchreid.data.ImageDataManager(**imagedata_kwargs(cfg))
+	return utils.data.ImageDataManager(**imagedata_kwargs(cfg))
 
 
 
 def build_engine(cfg, datamanager, model, optimizer, scheduler):
 
-    engine = utils.engine.SENet(
+    engine = utils.engine.SeNetEngine(
         datamanager,
         model,
         optimizer,
@@ -101,8 +104,8 @@ def main():
     if cfg.use_gpu:
         model = nn.DataParallel(model).cuda()
 
-    optimizer = torchreid.optim.build_optimizer(model, **optimizer_kwargs(cfg))
-    scheduler = torchreid.optim.build_lr_scheduler(optimizer, **lr_scheduler_kwargs(cfg))
+    optimizer = utils.optim.build_optimizer(model, **optimizer_kwargs(cfg))
+    scheduler = utils.optim.build_lr_scheduler(optimizer, **lr_scheduler_kwargs(cfg))
 
     if cfg.model.resume and check_isfile(cfg.model.resume):
         args.start_epoch = resume_from_checkpoint(cfg.model.resume, model, optimizer=optimizer)

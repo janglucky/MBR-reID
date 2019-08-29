@@ -28,8 +28,8 @@ class DataManager(object):
 
     def __init__(self, sources=None, targets=None, height=256, width=128, transforms='random_flip',
                  norm_mean=None, norm_std=None, use_gpu=False):
-        self.sources = sources # 训练数据
-        self.targets = targets # 测试目标，一般保持和训练数据一致，也就是不做迁移
+        self.sources = sources 
+        self.targets = targets
         self.height = height
         self.width = width
 
@@ -131,7 +131,7 @@ class ImageDataManager(DataManager):
         
         print('=> Loading train (source) dataset')
         trainset = []  
-        for name in self.sources: #如果训练集由多个数据集组成，则合并这些数据集
+        for name in self.sources:
             trainset_ = init_image_dataset(
                 name,
                 transform=[self.transform_tr,self.transform_dp],
