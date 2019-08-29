@@ -17,8 +17,8 @@ from configs.default_configs import (
 )
 
 from utils.assist import (
-	set_random_seed, compute_model_complexity,
-    Logger, check_isfile, collect_env_info
+	set_random_seed, compute_model_complexity,load_pretrained_weights,
+    Logger, check_isfile, collect_env_info,resume_from_checkpoint
 )
 
 def build_datamanager(cfg):

@@ -18,8 +18,13 @@ import torchvision
 
 from tensorboardX import SummaryWriter
 
-from utils.assist import AverageMeter, mkdir_if_missing
+from utils.assist import (
+    AverageMeter, mkdir_if_missing, re_ranking,
+    visualize_ranked_results, save_checkpoint
+)
 from utils import metrics
+
+from utils.losses import DeepSupervision
 
 
 GRID_SPACING = 10
