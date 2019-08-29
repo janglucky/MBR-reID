@@ -213,10 +213,7 @@ class Engine(object):
                   dist_metric='euclidean', normalize_feature=False, visrank=False,
                   visrank_topk=10, save_dir='', use_metric_cuhk03=False, ranks=[1, 5, 10, 20],
                   rerank=False):
-
-    """
-    由于使用@torch.no_grad()装饰，return.requires_grad == False
-    """
+    
         batch_time = AverageMeter()
 
         print('Extracting features from query set ...')

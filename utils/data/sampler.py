@@ -7,7 +7,7 @@ import copy
 import random
 
 import torch
-from torch.utils.data.sampler import Sampler
+from torch.utils.data.sampler import Sampler, RandomSampler
 
 
 class RandomIdentitySampler(Sampler):

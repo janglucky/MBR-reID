@@ -45,7 +45,7 @@ class DataManager(object):
         if isinstance(self.targets, str):
             self.targets = [self.targets]
 
-        self.transform_tr, self.transform_te = build_transforms(
+        self.transform_tr, self.transform_te, self.transform_dp = build_transforms(
             self.height, self.width, transforms=transforms,
             norm_mean=norm_mean, norm_std=norm_std
         )
@@ -134,7 +134,7 @@ class ImageDataManager(DataManager):
         for name in self.sources: #如果训练集由多个数据集组成，则合并这些数据集
             trainset_ = init_image_dataset(
                 name,
-                transform=self.transform_tr,
+                transform=[self.transform_tr,self.transform_dp],
                 mode='train',
                 combineall=combineall,
                 root=root,
@@ -170,11 +170,12 @@ class ImageDataManager(DataManager):
         self.testloader = {name: {'query': None, 'gallery': None} for name in self.targets}
         self.testdataset = {name: {'query': None, 'gallery': None} for name in self.targets}
 
+
         for name in self.targets:
             # build query loader
             queryset = init_image_dataset(
                 name,
-                transform=self.transform_te,
+                transform=[self.transform_te],
                 mode='query',
                 combineall=combineall,
                 root=root,
@@ -195,7 +196,7 @@ class ImageDataManager(DataManager):
             # build gallery loader
             galleryset = init_image_dataset(
                 name,
-                transform=self.transform_te,
+                transform=[self.transform_te],
                 mode='gallery',
                 combineall=combineall,
                 verbose=False,

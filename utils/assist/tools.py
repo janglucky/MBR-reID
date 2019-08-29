@@ -1,3 +1,4 @@
+#-*- coding:UTF-8 -*-
 from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import division
@@ -18,7 +19,6 @@ import PIL
 from PIL import Image
 
 import torch
-
 
 def mkdir_if_missing(dirname):
     """Creates dirname if it is missing."""

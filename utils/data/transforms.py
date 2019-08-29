@@ -194,4 +194,9 @@ def build_transforms(height, width, transforms='random_flip', norm_mean=[0.485, 
         normalize,
     ])
 
-    return transform_tr, transform_te
+    transform_dp = Compose([
+        ToTensor(),
+        normalize,
+    ])
+
+    return transform_tr, transform_te, transform_dp

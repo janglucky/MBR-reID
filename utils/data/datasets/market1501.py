@@ -45,12 +45,13 @@ class Market1501(ImageDataset):
     dataset_url = 'http://188.138.127.15:81/Datasets/Market-1501-v15.09.15.zip'
 
     def __init__(self, root='', densepose='', market1501_500k=False, **kwargs):
+
         self.root = osp.abspath(osp.expanduser(root))
-        self.densepose = osp.abspath(osp.expanduser(root))
+        self.densepose = osp.abspath(osp.expanduser(densepose))
 
-        self.dataset_dir = osp.join(self.root, self.dataset_dir)
         self.densepose_dir = osp.join(self.densepose, self.dataset_dir)
-
+        self.dataset_dir = osp.join(self.root, self.dataset_dir)
+        
         self.download_dataset(self.dataset_dir, self.dataset_url)
         
         # allow alternative directory structure
@@ -65,6 +66,7 @@ class Market1501(ImageDataset):
         
         self.train_dir = osp.join(self.data_dir, 'bounding_box_train')
         self.train_densepose_dir = osp.join(self.densepose_dir, 'bounding_box_train')
+
         self.query_dir = osp.join(self.data_dir, 'query')
         self.gallery_dir = osp.join(self.data_dir, 'bounding_box_test')
         self.extra_gallery_dir = osp.join(self.data_dir, 'images')
@@ -75,16 +77,15 @@ class Market1501(ImageDataset):
             self.train_dir,
             self.query_dir,
             self.gallery_dir,
-            self.train_densepose_dir
         ]
 
         if self.market1501_500k:
             required_files.append(self.extra_gallery_dir)
         self.check_before_run(required_files)
 
-        train = self.process_dir(self.train_dir, densepose=self.train_densepose_dir, relabel=True)
-        query = self.process_dir(self.query_dir, relabel=False)
-        gallery = self.process_dir(self.gallery_dir, relabel=False)
+        train = self.process_dir(dir_path=self.train_dir, densepose=self.train_densepose_dir, relabel=True)
+        query = self.process_dir(dir_path=self.query_dir, relabel=False)
+        gallery = self.process_dir(dir_path=self.gallery_dir, relabel=False)
         if self.market1501_500k:
             gallery += self.process_dir(self.extra_gallery_dir, relabel=False)
 
@@ -92,8 +93,6 @@ class Market1501(ImageDataset):
 
     def process_dir(self, dir_path, densepose='',relabel=False):
 
-
-        #获取指定目录下的所有图片路径
         img_paths = glob.glob(osp.join(dir_path, '*.jpg'))
         pattern = re.compile(r'([-\d]+)_c(\d)')
 
@@ -126,8 +125,16 @@ class Market1501(ImageDataset):
 
             #To do
 
+            if densepose == '':
 
+                data.append((img_path, pid, camid,densepose))
 
-            data.append((img_path, pid, camid))
+            else:
+                filename = osp.basename(img_path)
+
+                if osp.exists(osp.join(densepose,filename)):                    
+                    data.append((img_path, pid, camid,osp.join(densepose,filename)))
+                else:
+                    continue
 
         return data

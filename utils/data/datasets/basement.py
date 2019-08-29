@@ -107,7 +107,7 @@ class Dataset(object):
         """
         pids = set() # 无序不重复元素集
         cams = set()
-        for _, pid, camid in data:
+        for _, pid, camid, _ in data:
             pids.add(pid)
             cams.add(camid)
         return len(pids), len(cams)
@@ -240,12 +240,18 @@ class ImageDataset(Dataset):
 
     def __getitem__(self, index):
         
-        img_path, pid, camid = self.data[index]
+        img_path, pid, camid, densepose_path = self.data[index]
         img = read_image(img_path)
+        densepose = None
+
+        if self.mode == 'train':
+            densepose = read_image(densepose_path)
+            densepose = self.transform[1](densepose)
 
         if self.transform is not None:
-            img = self.transform(img)
-        return img, pid, camid, img_path
+            img = self.transform[0](img)
+
+        return img, pid, camid, img_path, densepose
 
     def show_summary(self):
         num_train_pids, num_train_cams = self.parse_data(self.train)
@@ -260,4 +266,3 @@ class ImageDataset(Dataset):
         print('  query    | {:5d} | {:8d} | {:9d}'.format(num_query_pids, len(self.query), num_query_cams))
         print('  gallery  | {:5d} | {:8d} | {:9d}'.format(num_gallery_pids, len(self.gallery), num_gallery_cams))
         print('  ----------------------------------------')
-
