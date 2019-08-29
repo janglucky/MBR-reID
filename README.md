@@ -3,6 +3,11 @@
 
 
 ## 环境需求
- python3.x
- pytorch >= 1.0
- GPU support
+
+os: ubuntu 16.04.6 LTS
+
+language: python3.x
+
+dependencies: pytorch >= 1.0
+
+GPU support
