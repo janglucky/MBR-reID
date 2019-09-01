@@ -48,11 +48,11 @@ def build_optimizer(
 
     Examples::
         >>> # A normal optimizer can be built by
-        >>> optimizer = torchreid.optim.build_optimizer(model, optim='sgd', lr=0.01)
+        >>> optimizer = utils.optim.build_optimizer(model, optim='sgd', lr=0.01)
         >>> # If you want to use a smaller learning rate for pretrained layers
         >>> # and the attribute name for the randomly initialized layer is 'classifier',
         >>> # you can do
-        >>> optimizer = torchreid.optim.build_optimizer(
+        >>> optimizer = utils.optim.build_optimizer(
         >>>     model, optim='sgd', lr=0.01, staged_lr=True,
         >>>     new_layers='classifier', base_lr_mult=0.1
         >>> )
@@ -60,7 +60,7 @@ def build_optimizer(
         >>> # have learning rate 0.01 * 0.1.
         >>> # new_layers can also take multiple attribute names. Say the new layers
         >>> # are 'fc' and 'classifier', you can do
-        >>> optimizer = torchreid.optim.build_optimizer(
+        >>> optimizer = utils.optim.build_optimizer(
         >>>     model, optim='sgd', lr=0.01, staged_lr=True,
         >>>     new_layers=['fc', 'classifier'], base_lr_mult=0.1
         >>> )

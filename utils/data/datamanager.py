@@ -3,6 +3,7 @@ from __future__ import print_function
 from __future__ import division
 
 import torch
+from torch.utils.data import DataLoader
 
 from utils.data.sampler import build_train_sampler
 from utils.data.transforms import build_transforms
@@ -156,7 +157,7 @@ class ImageDataManager(DataManager):
             num_instances=num_instances
         )
 
-        self.trainloader = torch.utils.data.DataLoader(
+        self.trainloader = DataLoader(
             trainset,
             sampler=train_sampler,
             batch_size=batch_size_train,
@@ -184,7 +185,7 @@ class ImageDataManager(DataManager):
                 cuhk03_classic_split=cuhk03_classic_split,
                 market1501_500k=market1501_500k
             )
-            self.testloader[name]['query'] = torch.utils.data.DataLoader(
+            self.testloader[name]['query'] = DataLoader(
                 queryset,
                 batch_size=batch_size_test,
                 shuffle=False,
@@ -206,7 +207,8 @@ class ImageDataManager(DataManager):
                 cuhk03_classic_split=cuhk03_classic_split,
                 market1501_500k=market1501_500k
             )
-            self.testloader[name]['gallery'] = torch.utils.data.DataLoader(
+
+            self.testloader[name]['gallery'] = DataLoader(
                 galleryset,
                 batch_size=batch_size_test,
                 shuffle=False,

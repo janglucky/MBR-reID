@@ -69,7 +69,6 @@ class SeNetEngine(engine.Engine):
                  label_smooth=False):
         super(SeNetEngine, self).__init__(datamanager, model, optimizer, scheduler, use_gpu)
 
-        print('##########in engine',label_smooth)
         self.criterion = CrossEntropyLoss(
             num_classes=self.datamanager.num_train_pids,
             use_gpu=self.use_gpu,
@@ -88,6 +87,10 @@ class SeNetEngine(engine.Engine):
             open_specified_layers(self.model, open_layers)
         else:
             open_all_layers(self.model)
+
+
+        if self.scheduler is not None:
+            self.scheduler.adjust_lr(epoch)
 
         num_batches = len(trainloader)
         end = time.time()
@@ -111,7 +114,7 @@ class SeNetEngine(engine.Engine):
             losses.update(loss.item(), pids.size(0))
             accs.update(metrics.accuracy(outputs, pids)[0].item())
 
-            if (batch_idx+1) % print_freq == 0:
+            if (batch_idx+1) % print_freq == 0: # print info per 20 batches
                 # estimate remaining time
                 eta_seconds = batch_time.avg * (num_batches-(batch_idx+1) + (max_epoch-(epoch+1))*num_batches)
                 eta_str = str(datetime.timedelta(seconds=int(eta_seconds)))
@@ -141,6 +144,3 @@ class SeNetEngine(engine.Engine):
                 self.writer.add_scalar('Train/Lr', self.optimizer.param_groups[0]['lr'], n_iter)
             
             end = time.time()
-
-        if self.scheduler is not None:
-            self.scheduler.step()

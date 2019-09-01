@@ -63,13 +63,14 @@ def main():
     args = parser.parse_args()
 
     cfg = get_default_config()
-    cfg.use_gpu = torch.cuda.is_available()
+    # cfg.use_gpu = torch.cuda.is_available()
     if args.config_file:
         cfg.merge_from_file(args.config_file)
     reset_config(cfg, args)
     cfg.merge_from_list(args.opts)
     cfg.freeze()
     set_random_seed(cfg.train.seed)
+
 
     if cfg.use_gpu and args.gpu_devices:
         # if gpu_devices is not specified, all available gpus will be used
@@ -105,7 +106,7 @@ def main():
         model = nn.DataParallel(model).cuda()
 
     optimizer = utils.optim.build_optimizer(model, **optimizer_kwargs(cfg))
-    scheduler = utils.optim.build_lr_scheduler(optimizer, **lr_scheduler_kwargs(cfg))
+    scheduler = utils.optim.build_lr_scheduler(optimizer,**lr_scheduler_kwargs(cfg))
 
     if cfg.model.resume and check_isfile(cfg.model.resume):
         args.start_epoch = resume_from_checkpoint(cfg.model.resume, model, optimizer=optimizer)

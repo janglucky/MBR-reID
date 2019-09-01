@@ -4,7 +4,6 @@ from __future__ import print_function
 __all__ = ['visualize_ranked_results']
 
 import numpy as np
-import os
 import os.path as osp
 import shutil
 

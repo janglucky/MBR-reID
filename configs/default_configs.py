@@ -23,7 +23,7 @@ def get_default_config():
     cfg.data.densepose = '/home/jy/datasets/DensePoseData'
     cfg.data.sources = ['market1501']
     cfg.data.targets = ['market1501']
-    cfg.data.workers = 4  # number of data loading workers
+    cfg.data.workers = 8  # number of data loading workers
     cfg.data.split_id = 0  # split index
     cfg.data.height = 256  # image height
     cfg.data.width = 128  # image width
@@ -43,15 +43,15 @@ def get_default_config():
 
     # sampler
     cfg.sampler = CN()
-    cfg.sampler.train_sampler = 'RandomSampler'
+    cfg.sampler.train_sampler = 'RandomIdentitySampler'
     cfg.sampler.num_instances = 4  # number of instances per identity for RandomIdentitySampler
 
     # train
     cfg.train = CN()
-    cfg.train.optim = 'adam'
-    cfg.train.lr = 0.0003
+    cfg.train.optim = 'sgd'
+    cfg.train.lr = 3e-2
     cfg.train.weight_decay = 5e-4
-    cfg.train.max_epoch = 60
+    cfg.train.max_epoch = 1
     cfg.train.start_epoch = 0
     cfg.train.batch_size = 32
     cfg.train.fixbase_epoch = 0  # number of epochs to fix base layers
@@ -60,10 +60,13 @@ def get_default_config():
     cfg.train.new_layers = ['classifier']  # newly added layers with default lr
     cfg.train.base_lr_mult = 0.1  # learning rate multiplier for base layers
     cfg.train.lr_scheduler = 'single_step'
-    cfg.train.stepsize = [20]  # stepsize to decay learning rate
+    cfg.train.stepsize = [60, 130,300]  # stepsize to decay learning rate
     cfg.train.gamma = 0.1  # learning rate decay multiplier
     cfg.train.print_freq = 20  # print frequency
     cfg.train.seed = 1  # random seed
+    cfg.train.warmup_epoch = 10 # model warmup
+    cfg.train.warmup_begin_lr = 3e-4
+    cfg.train.warmup_mode = 'linear'
 
     # optimizer
     cfg.sgd = CN()
@@ -88,7 +91,7 @@ def get_default_config():
 
     # test
     cfg.test = CN()
-    cfg.test.batch_size = 100
+    cfg.test.batch_size = 32
     cfg.test.dist_metric = 'euclidean'  # distance metric, ['euclidean', 'cosine']
     cfg.test.normalize_feature = False  # normalize feature vectors before computing distance
     cfg.test.ranks = [1, 5, 10, 20]  # cmc ranks
@@ -147,9 +150,11 @@ def optimizer_kwargs(cfg):
 
 def lr_scheduler_kwargs(cfg):
     return {
-        'lr_scheduler': cfg.train.lr_scheduler,
         'stepsize': cfg.train.stepsize,
-        'gamma': cfg.train.gamma
+        'gamma': cfg.train.gamma,
+        'warmup_epoch': cfg.train.warmup_epoch,
+        'warmup_begin_lr': cfg.train.warmup_begin_lr,
+        'warmup_mode': cfg.train.warmup_mode
     }
 
 

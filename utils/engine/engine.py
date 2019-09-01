@@ -196,6 +196,9 @@ class Engine(object):
             print('##### Evaluating {} ({}) #####'.format(name, domain))
             queryloader = testloader[name]['query']
             galleryloader = testloader[name]['gallery']
+
+            for data in queryloader:
+                print(data)
             rank1 = self._evaluate(
                 epoch,
                 dataset_name=name,
@@ -223,7 +226,12 @@ class Engine(object):
 
         print('Extracting features from query set ...')
         qf, q_pids, q_camids = [], [], [] # query features, query person IDs and query camera IDs
+
+        print(queryloader)
         for batch_idx, data in enumerate(queryloader):
+
+
+            print(data)
             imgs, pids, camids = self._parse_data_for_eval(data)
             if self.use_gpu:
                 imgs = imgs.cuda()
