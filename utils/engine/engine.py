@@ -15,12 +15,12 @@ import torch
 import torch.nn as nn
 from torch.nn import functional as F
 import torchvision
-
+from torch.autograd import Variable
 from tensorboardX import SummaryWriter
 
 from utils.assist import (
     AverageMeter, mkdir_if_missing, re_ranking,
-    visualize_ranked_results, save_checkpoint
+    visualize_ranked_results, save_checkpoint,fliplr
 )
 from utils import metrics
 
@@ -42,13 +42,15 @@ class Engine(object):
         use_gpu (bool, optional): use gpu. Default is True.
     """
 
-    def __init__(self, datamanager, model, optimizer=None, scheduler=None, use_gpu=True):
+    # datamanager, model, optimizer, scheduler, use_gpu
+    def __init__(self, datamanager, model,  optimizer=None, scheduler=None, use_gpu=True):
         self.datamanager = datamanager
         self.model = model
         self.optimizer = optimizer
         self.scheduler = scheduler
         self.use_gpu = (torch.cuda.is_available() and use_gpu)
         self.writer = None
+
 
         # check attributes
         if not isinstance(self.model, nn.Module):
@@ -121,8 +123,8 @@ class Engine(object):
 
         for epoch in range(start_epoch, max_epoch):
             self.train(epoch, max_epoch, trainloader, fixbase_epoch, open_layers, print_freq)
-            
-            if (epoch+1)>=start_eval and eval_freq>0 and (epoch+1)%eval_freq==0 and (epoch+1)!=max_epoch:
+            print(start_epoch, max_epoch)
+            if epoch >= start_epoch and (epoch+1)>=start_eval and eval_freq>0 and (epoch+1)%eval_freq==0 and (epoch+1)!=max_epoch:
                 rank1 = self.test(
                     epoch,
                     testloader,
@@ -190,6 +192,8 @@ class Engine(object):
             but not a must. Please refer to the source code for more details.
         """
         targets = list(testloader.keys())
+
+        print(targets)
         
         for name in targets:
             domain = 'source' if name in self.datamanager.sources else 'target'
@@ -197,8 +201,7 @@ class Engine(object):
             queryloader = testloader[name]['query']
             galleryloader = testloader[name]['gallery']
 
-            for data in queryloader:
-                print(data)
+
             rank1 = self._evaluate(
                 epoch,
                 dataset_name=name,
@@ -227,16 +230,14 @@ class Engine(object):
         print('Extracting features from query set ...')
         qf, q_pids, q_camids = [], [], [] # query features, query person IDs and query camera IDs
 
-        print(queryloader)
+
         for batch_idx, data in enumerate(queryloader):
 
-
-            print(data)
             imgs, pids, camids = self._parse_data_for_eval(data)
             if self.use_gpu:
                 imgs = imgs.cuda()
             end = time.time()
-            features = self._extract_features(imgs)
+            features = self._extract_features(imgs,self.layer)
             batch_time.update(time.time() - end)
             features = features.data.cpu()
             qf.append(features)
@@ -255,7 +256,7 @@ class Engine(object):
             if self.use_gpu:
                 imgs = imgs.cuda()
             end = time.time()
-            features = self._extract_features(imgs)
+            features = self._extract_features(imgs,self.layer)
             batch_time.update(time.time() - end)
             features = features.data.cpu()
             gf.append(features)
@@ -294,10 +295,10 @@ class Engine(object):
         )
 
         print('** Results **')
-        print('mAP: {:.1%}'.format(mAP))
+        print('mAP: {:.3%}'.format(mAP))
         print('CMC curve')
         for r in ranks:
-            print('Rank-{:<3}: {:.1%}'.format(r, cmc[r-1]))
+            print('Rank-{:<3}: {:.3%}'.format(r, cmc[r-1]))
 
         if visrank:
             visualize_ranked_results(
@@ -399,16 +400,48 @@ class Engine(object):
                 if (batch_idx+1) % print_freq == 0:
                     print('- done batch {}/{}'.format(batch_idx+1, len(queryloader)))
 
-    def _compute_loss(self, criterion, outputs, targets):
-        if isinstance(outputs, (tuple, list)):
-            loss = DeepSupervision(criterion, outputs, targets)
-        else:
-            loss = criterion(outputs, targets)
+    def _compute_loss(self, criterion, outputs, targets, loss_weighs):
+
+        assert isinstance(criterion,list)
+        assert isinstance(targets,list)
+        assert isinstance(loss_weighs,list)
+
+        loss = DeepSupervision(criterion, outputs, targets, loss_weighs)
+
         return loss
 
-    def _extract_features(self, input):
+
+
+    def _extract_features(self, input, layer):
+
         self.model.eval()
-        return self.model(input)
+
+
+        ff = torch.FloatTensor(input.size(0), 2253).zero_().cuda()
+
+        if self.use_gpu:
+            input = input.data.cpu()
+
+
+
+        for i in range(1):
+            if (i == 1):
+                input = fliplr(input)
+
+            if self.use_gpu:
+                input_img = Variable(input.cuda())
+            else:
+                input_img = input
+
+            features = self.model(input_img)
+
+            if isinstance(layer,list):
+                f = torch.cat([features[l] for l in layer], dim=1)
+            else:
+                f = features[layer]
+
+            ff += f
+        return f
 
     def _parse_data_for_train(self, data):
         imgs = data[0]

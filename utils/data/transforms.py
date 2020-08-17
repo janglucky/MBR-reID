@@ -165,13 +165,26 @@ def build_transforms(height, width, transforms='random_flip', norm_mean=[0.485, 
     transform_tr = []
     transform_tr += [Resize((height, width))]
     print('+ resize to {}x{}'.format(height, width))
+
+    if 'random_crop' in transforms:
+        print('+ random crop')
+        transform_tr += [RandomCrop((height,width))]
+
     if 'random_flip' in transforms:
         print('+ random flip')
-        transform_tr += [RandomHorizontalFlip()]
+        transform_tr += [RandomHorizontalFlip(0.5)]
+
+    if 'pad' in transforms:
+        print('+ pad')
+        transform_tr += [Pad(10)]
+
     if 'random_crop' in transforms:
-        print('+ random crop (enlarge to {}x{} and ' \
-              'crop {}x{})'.format(int(round(height*1.125)), int(round(width*1.125)), height, width))
-        transform_tr += [Random2DTranslation(height, width)]
+        print('+ random crop')
+        transform_tr += [RandomCrop((height,width))]
+    # if 'random_crop' in transforms:
+    #     print('+ random crop (enlarge to {}x{} and ' \
+    #           'crop {}x{})'.format(int(round(height*1.125)), int(round(width*1.125)), height, width))
+    #     transform_tr += [Random2DTranslation(height, width)]
     if 'color_jitter' in transforms:
         print('+ color jitter')
         transform_tr += [ColorJitter(brightness=0.2, contrast=0.15, saturation=0, hue=0)]
@@ -181,7 +194,7 @@ def build_transforms(height, width, transforms='random_flip', norm_mean=[0.485, 
     transform_tr += [normalize]
     if 'random_erase' in transforms:
         print('+ random erase')
-        transform_tr += [RandomErasing()]
+        transform_tr += [RandomErasing(probability=0.5)]
     transform_tr = Compose(transform_tr)
 
     print('Building test transforms ...')
@@ -195,6 +208,7 @@ def build_transforms(height, width, transforms='random_flip', norm_mean=[0.485, 
     ])
 
     transform_dp = Compose([
+        Resize((32,32)),
         ToTensor(),
         normalize,
     ])

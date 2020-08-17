@@ -122,7 +122,6 @@ def build_optimizer(
             lr=lr,
             momentum=momentum,
             weight_decay=weight_decay,
-            dampening=sgd_dampening,
             nesterov=sgd_nesterov,
         )
 

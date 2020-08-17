@@ -92,10 +92,11 @@ class build_lr_scheduler(object):
     """
 
     def __init__(self, optimizer, stepsize=(30, 60), gamma=0.1,
-                 warmup_epoch=0, warmup_begin_lr=0, warmup_mode='linear'):
+                 warmup_epoch=0, warmup_begin_lr=3e-4, warmup_mode='linear'):
 
         self.optimizer = optimizer
         self.base_lr = optimizer.param_groups[0]['lr']
+
         self.learning_rate = optimizer.param_groups[0]['lr']
         self.stepsize = stepsize
         self.gamma = gamma

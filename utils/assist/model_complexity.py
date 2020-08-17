@@ -311,8 +311,10 @@ def compute_model_complexity(model, input_size, verbose=False, only_conv_linear=
 
     model.eval().apply(_add_hooks)
     input = torch.rand(input_size)
+
     if next(model.parameters()).is_cuda:
         input = input.cuda()
+
     model(input) # forward
     
     for handle in registered_handles:

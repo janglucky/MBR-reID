@@ -41,16 +41,16 @@ class Market1501(ImageDataset):
     """
     
     _junk_pids = [0, -1]
-    dataset_dir = 'market1501'
+    dataset_name = 'market1501'
     dataset_url = 'http://188.138.127.15:81/Datasets/Market-1501-v15.09.15.zip'
 
     def __init__(self, root='', densepose='', market1501_500k=False, **kwargs):
 
         self.root = osp.abspath(osp.expanduser(root))
-        self.densepose = osp.abspath(osp.expanduser(densepose))
+        self.densepose = densepose
 
-        self.densepose_dir = osp.join(self.densepose, self.dataset_dir)
-        self.dataset_dir = osp.join(self.root, self.dataset_dir)
+        self.densepose_dir = osp.join(self.densepose, self.dataset_name)
+        self.dataset_dir = osp.join(self.root, self.dataset_name)
         
         self.download_dataset(self.dataset_dir, self.dataset_url)
         

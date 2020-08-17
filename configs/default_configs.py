@@ -11,9 +11,9 @@ def get_default_config():
 
     # model
     cfg.model = CN()
-    cfg.model.name = 'ft_net'
-    cfg.model.pretrained = True  # automatically load pretrained model weights if available
-    cfg.model.load_weights = ''  # path to model weights
+    cfg.model.name = 'AENet'
+    cfg.model.pretrained = False  # automatically load pretrained model weights if available
+    cfg.model.load_weights = 'log/model.pth.tar-149'  # path to model weights
     cfg.model.resume = ''  # path to checkpoint for resume training
 
     # data
@@ -28,7 +28,7 @@ def get_default_config():
     cfg.data.height = 256  # image height
     cfg.data.width = 128  # image width
     cfg.data.combineall = False  # combine train, query and gallery for training
-    cfg.data.transforms = ['random_flip']  # data augmentation
+    cfg.data.transforms = ['random_crop','random_flip','pad','random_erase']  # data augmentation
     cfg.data.norm_mean = [0.485, 0.456, 0.406]  # default is imagenet mean
     cfg.data.norm_std = [0.229, 0.224, 0.225]  # default is imagenet std
     cfg.data.save_dir = 'log'  # path to save log
@@ -48,10 +48,11 @@ def get_default_config():
 
     # train
     cfg.train = CN()
+    cfg.train.evaluate_epoch = 120
     cfg.train.optim = 'sgd'
     cfg.train.lr = 3e-2
     cfg.train.weight_decay = 5e-4
-    cfg.train.max_epoch = 1
+    cfg.train.max_epoch = 320
     cfg.train.start_epoch = 0
     cfg.train.batch_size = 32
     cfg.train.fixbase_epoch = 0  # number of epochs to fix base layers
@@ -72,36 +73,41 @@ def get_default_config():
     cfg.sgd = CN()
     cfg.sgd.momentum = 0.9  # momentum factor for sgd and rmsprop
     cfg.sgd.dampening = 0.  # dampening for momentum
-    cfg.sgd.nesterov = False  # Nesterov momentum
+    cfg.sgd.nesterov = True  # Nesterov momentum
     cfg.rmsprop = CN()
     cfg.rmsprop.alpha = 0.99  # smoothing constant
     cfg.adam = CN()
-    cfg.adam.beta1 = 0.9  # exponential decay rate for first moment
+    cfg.adam.beta1 = 0.9  # exponential decay rate for first moments
     cfg.adam.beta2 = 0.999  # exponential decay rate for second moment
 
     # loss
     cfg.loss = CN()
-    cfg.loss.name = 'softmax'
+
+    ## criterions
+    cfg.loss.name = ['softmax','softmax','softmax','triplet','triplet','triplet','triplet','triplet','triplet','sm' ]
+    cfg.loss.weights = [1/3, 1/3,1/3,1/6,1/6,1/6,1/6,1/6,1/6,0.1*1/24]
+
     cfg.loss.softmax = CN()
     cfg.loss.softmax.label_smooth = True  # use label smoothing regularizer
     cfg.loss.triplet = CN()
     cfg.loss.triplet.margin = 0.3  # distance margin
-    cfg.loss.triplet.weight_t = 1.  # weight to balance hard triplet loss
-    cfg.loss.triplet.weight_x = 0.  # weight to balance cross entropy loss
+    # cfg.loss.triplet.weight_t = 1.  # weight to balance hard triplet loss
+    # cfg.loss.triplet.weight_x = 0.  # weight to balance cross entropy loss
 
     # test
     cfg.test = CN()
     cfg.test.batch_size = 32
-    cfg.test.dist_metric = 'euclidean'  # distance metric, ['euclidean', 'cosine']
-    cfg.test.normalize_feature = False  # normalize feature vectors before computing distance
+    cfg.test.dist_metric = 'cosine'  # distance metric, ['euclidean', 'cosine']
+    cfg.test.normalize_feature = True  # normalize feature vectors before computing distance
     cfg.test.ranks = [1, 5, 10, 20]  # cmc ranks
     cfg.test.evaluate = False  # test only
-    cfg.test.eval_freq = -1  # evaluation frequency (-1 means to only test after training)
-    cfg.test.start_eval = 0  # start to evaluate after a specific epoch
+    cfg.test.eval_freq = 10  # evaluation frequency (-1 means to only test after training)
+    cfg.test.start_eval = 120  # start to evaluate after a specific epoch
     cfg.test.rerank = False  # use person re-ranking
     cfg.test.visrank = False  # visualize ranked results (only available when cfg.test.evaluate=True)
     cfg.test.visrank_topk = 10  # top-k ranks to visualize
     cfg.test.visactmap = False  # visualize CNN activation maps
+    cfg.test.layer = [0,1,2]
 
     return cfg
 
@@ -176,5 +182,5 @@ def engine_run_kwargs(cfg):
         'use_metric_cuhk03': cfg.cuhk03.use_metric_cuhk03,
         'ranks': cfg.test.ranks,
         'rerank': cfg.test.rerank,
-        'visactmap': cfg.test.visactmap
+        'visactmap': cfg.test.visactmap,
     }

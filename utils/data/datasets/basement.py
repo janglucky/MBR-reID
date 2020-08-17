@@ -245,12 +245,21 @@ class ImageDataset(Dataset):
         densepose = None
 
         if self.mode == 'train':
-            densepose = read_image(densepose_path)
-            densepose = self.transform[1](densepose)
+            dp = read_image(densepose_path)
+
+            densepose = []
+            for i in range(24):
+                row = int(i / 6)
+                col = i % 6
+
+                densepose.append(self.transform[1](dp.crop((col * 32, row * 32, (col + 1) * 32, (row + 1) * 32))))
 
         if self.transform is not None:
             img = self.transform[0](img)
 
+        if not isinstance(densepose,list):
+            # densepose = torch.zeros(img.shape)
+            densepose = []
         return img, pid, camid, img_path, densepose
 
     def show_summary(self):

@@ -1,13 +1,13 @@
 from __future__ import absolute_import
 
-import torch
-
-from .ft_net import *
+from .ft_net import ft_net
+from .AENet import AENet
 
 
 __model_factory = {
     # image classification models
     'ft_net': ft_net,
+    'AENet': AENet
 }
 
 

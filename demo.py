@@ -35,8 +35,12 @@ def build_engine(cfg, datamanager, model, optimizer, scheduler):
         optimizer,
         scheduler=scheduler,
         use_gpu=cfg.use_gpu,
-        label_smooth=cfg.loss.softmax.label_smooth
+        label_smooth=cfg.loss.softmax.label_smooth,
+        criterion = cfg.loss.name,
+        layer=cfg.test.layer,
+        loss_weights = cfg.loss.weights,
     )
+
     return engine
 
 
@@ -64,6 +68,7 @@ def main():
 
     cfg = get_default_config()
     # cfg.use_gpu = torch.cuda.is_available()
+    print('show config_file\n{}\n'.format(args.config_file))
     if args.config_file:
         cfg.merge_from_file(args.config_file)
     reset_config(cfg, args)
@@ -99,7 +104,8 @@ def main():
     num_params, flops = compute_model_complexity(model, (1, 3, cfg.data.height, cfg.data.width))
     print('Model complexity: params={:,} flops={:,}'.format(num_params, flops))
 
-    if cfg.model.load_weights and check_isfile(cfg.model.load_weights):
+    if cfg.model.load_weights and check_isfile(cfg.model.load_weights) and cfg.test.evaluate:
+        print('loading pretrained model...')
         load_pretrained_weights(model, cfg.model.load_weights)
     
     if cfg.use_gpu:
@@ -107,6 +113,7 @@ def main():
 
     optimizer = utils.optim.build_optimizer(model, **optimizer_kwargs(cfg))
     scheduler = utils.optim.build_lr_scheduler(optimizer,**lr_scheduler_kwargs(cfg))
+
 
     if cfg.model.resume and check_isfile(cfg.model.resume):
         args.start_epoch = resume_from_checkpoint(cfg.model.resume, model, optimizer=optimizer)

@@ -4,7 +4,7 @@ from __future__ import print_function
 from __future__ import division
 
 __all__ = ['mkdir_if_missing', 'check_isfile', 'read_json', 'write_json',
-           'set_random_seed', 'download_url', 'read_image', 'collect_env_info']
+           'set_random_seed', 'download_url', 'read_image', 'fliplr','collect_env_info']
 
 import sys
 import os
@@ -123,6 +123,15 @@ def read_image(path):
             pass
     return img
 
+def fliplr(img):
+    """
+    Flip the input image Horizontally
+    :param img: type(torch.Tensor)
+    :return: the result
+    """
+    inv_idx = torch.arange(img.size(3) - 1, -1, -1).long()  # N x C x H x W
+    img_flip = img.index_select(3, inv_idx)
+    return img_flip
 
 def collect_env_info():
     """Returns env info as a string.

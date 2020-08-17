@@ -1,4 +1,3 @@
-from __future__ import division
 
-
-print('{:.2%}'.format(0.09))
+for i in range(24):
+    print(int(i/6)*32,(int(i/6)+1)*32,i%6*32,(i%6+1)*32)

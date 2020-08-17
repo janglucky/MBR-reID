@@ -217,6 +217,7 @@ class ImageDataManager(DataManager):
                 drop_last=False
             )
 
+
             self.testdataset[name]['query'] = queryset.query
             self.testdataset[name]['gallery'] = galleryset.gallery
 

@@ -21,7 +21,7 @@ def compute_distance_matrix(input1, input2, metric='euclidean'):
         torch.Tensor: distance matrix.
 
     Examples::
-       >>> from torchreid import metrics
+       >>> from utls import metrics
        >>> input1 = torch.rand(10, 2048)
        >>> input2 = torch.rand(100, 2048)
        >>> distmat = metrics.compute_distance_matrix(input1, input2)
@@ -77,4 +77,5 @@ def cosine_distance(input1, input2):
     input1_normed = F.normalize(input1, p=2, dim=1)
     input2_normed = F.normalize(input2, p=2, dim=1)
     distmat = 1 - torch.mm(input1_normed, input2_normed.t())
+
     return distmat
