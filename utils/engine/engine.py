@@ -7,6 +7,7 @@ import os
 import os.path as osp
 import time
 import datetime
+from tqdm import tqdm
 import numpy as np
 import cv2
 from matplotlib import pyplot as plt
@@ -122,8 +123,9 @@ class Engine(object):
         print('=> Start training')
 
         for epoch in range(start_epoch, max_epoch):
+            
             self.train(epoch, max_epoch, trainloader, fixbase_epoch, open_layers, print_freq)
-            print(start_epoch, max_epoch)
+
             if epoch >= start_epoch and (epoch+1)>=start_eval and eval_freq>0 and (epoch+1)%eval_freq==0 and (epoch+1)!=max_epoch:
                 rank1 = self.test(
                     epoch,
@@ -435,11 +437,11 @@ class Engine(object):
 
             features = self.model(input_img)
 
+
             if isinstance(layer,list):
                 f = torch.cat([features[l] for l in layer], dim=1)
             else:
                 f = features[layer]
-
             ff += f
         return f
 

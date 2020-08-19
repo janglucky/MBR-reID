@@ -56,9 +56,9 @@ class Market1501(ImageDataset):
         
         # allow alternative directory structure
         self.data_dir = self.dataset_dir
-        data_dir = osp.join(self.data_dir, 'Market-1501-v15.09.15')
-        if osp.isdir(data_dir):
-            self.data_dir = data_dir
+        _data_dir = osp.join(self.data_dir, 'Market-1501-v15.09.15')
+        if osp.isdir(_data_dir):
+            self.data_dir = _data_dir
         else:
             warnings.warn('The current data structure is deprecated. Please '
                           'put data folders such as "bounding_box_train" under '
@@ -66,6 +66,7 @@ class Market1501(ImageDataset):
         
         self.train_dir = osp.join(self.data_dir, 'bounding_box_train')
         self.train_densepose_dir = osp.join(self.densepose_dir, 'bounding_box_train')
+        print(self.train_densepose_dir)
 
         self.query_dir = osp.join(self.data_dir, 'query')
         self.gallery_dir = osp.join(self.data_dir, 'bounding_box_test')
@@ -127,10 +128,8 @@ class Market1501(ImageDataset):
 
             else:
                 filename = osp.basename(img_path)
+                _label = filename[:4]                   
+                data.append((img_path, pid, camid, osp.join(densepose,_label,'max.jpg')))
 
-                if osp.exists(osp.join(densepose,filename)):                    
-                    data.append((img_path, pid, camid, osp.join(densepose,filename)))
-                else:
-                    continue
 
         return data

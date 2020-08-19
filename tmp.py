@@ -1,3 +1,8 @@
+from tqdm import tqdm
+import time
 
-for i in range(24):
-    print(int(i/6)*32,(int(i/6)+1)*32,i%6*32,(i%6+1)*32)
+pbar = tqdm(range(300))
+for i in pbar:
+	pbar.set_description("Processing %d" % i)
+	time.sleep(0.1)
+

@@ -4,10 +4,9 @@ from __future__ import division
 
 import time
 import datetime
+from tqdm import tqdm
 
 import torch
-
-from utils.engine import engine
 
 from utils.engine import engine
 from utils.assist import AverageMeter, open_specified_layers, open_all_layers
@@ -16,7 +15,7 @@ from utils import metrics
 from utils.assist import AverageMeter
 
 
-class SeNetEngine(engine.Engine):
+class AENetEngine(engine.Engine):
     r"""Softmax-loss engine for image-reid.
 
     Args:
@@ -68,7 +67,7 @@ class SeNetEngine(engine.Engine):
     def __init__(self, datamanager, model, optimizer, scheduler=None, use_gpu=True,
                  label_smooth=False, criterion = ['softmax'],layer=0, loss_weights = [1.0]):
 
-        super(SeNetEngine, self).__init__(datamanager=datamanager, model=model, optimizer = optimizer, scheduler = scheduler, use_gpu=use_gpu)
+        super(AENetEngine, self).__init__(datamanager=datamanager, model=model, optimizer = optimizer, scheduler = scheduler, use_gpu=use_gpu)
 
         self.criterion = criterion
         self.loss_weighs = loss_weights
@@ -92,55 +91,60 @@ class SeNetEngine(engine.Engine):
 
         num_batches = len(trainloader)
         end = time.time()
-        for batch_idx, data in enumerate(trainloader):
-            data_time.update(time.time() - end)
+        with tqdm(total=num_batches,desc=f'Epoch {epoch+1}/{max_epoch}',unit='iter') as pbar:
+            for batch_idx, data in enumerate(trainloader):
 
-            imgs, pids, densepose = self._parse_data_for_train(data)
+                data_time.update(time.time() - end)
+                imgs, pids, densepose = self._parse_data_for_train(data)
 
-            if self.use_gpu:
-                imgs = imgs.cuda()
-                pids = pids.cuda()
-                densepose = [dp.cuda() for dp in densepose]
-            
-            self.optimizer.zero_grad()
-            outputs = self.model(imgs)
+                if self.use_gpu:
+                    imgs = imgs.cuda()
+                    pids = pids.cuda()
+                    densepose = [dp.cuda() for dp in densepose]
+                
+                self.optimizer.zero_grad()
+                outputs = self.model(imgs)
 
-            loss = self._compute_loss(self.criterion, outputs, [pids for i in range(9)]+[densepose],self.loss_weighs)
-            loss.backward()
-            self.optimizer.step()
+                loss = self._compute_loss(self.criterion, outputs, [pids for i in range(9)]+[densepose],self.loss_weighs)
+                loss.backward()
+                self.optimizer.step()
 
-            batch_time.update(time.time() - end)
+                batch_time.update(time.time() - end)
 
-            losses.update(loss.item(), pids.size(0))
-            accs.update(metrics.accuracy(outputs, pids)[0].item())
+                losses.update(loss.item(), pids.size(0))
+                accs.update(metrics.accuracy(outputs, pids)[0].item())
+                pbar.set_postfix({'Loss':'{:.4f}'.format(losses.avg),'Acc':'{:.2f}'.format(accs.avg)})
 
-            if (batch_idx+1) % print_freq == 0: # print info per 20 batches
-                # estimate remaining time
-                eta_seconds = batch_time.avg * (num_batches-(batch_idx+1) + (max_epoch-(epoch+1))*num_batches)
-                eta_str = str(datetime.timedelta(seconds=int(eta_seconds)))
-                print('Epoch: [{0}/{1}][{2}/{3}]\t'
-                      'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
-                      'Data {data_time.val:.3f} ({data_time.avg:.3f})\t'
-                      'Loss {loss.val:.4f} ({loss.avg:.4f})\t'
-                      'Acc {acc.val:.2f} ({acc.avg:.2f})\t'
-                      'Lr {lr:.6f}\t'
-                      'eta {eta}'.format(
-                      epoch+1, max_epoch, batch_idx+1, num_batches,
-                      batch_time=batch_time,
-                      data_time=data_time,
-                      loss=losses,
-                      acc=accs,
-                      lr=self.optimizer.param_groups[0]['lr'],
-                      eta=eta_str
-                    )
-                )
+                # if (batch_idx+1) % print_freq == 0: # print info per 20 batches
+                #     # estimate remaining time
+                #     eta_seconds = batch_time.avg * (num_batches-(batch_idx+1) + (max_epoch-(epoch+1))*num_batches)
+                #     eta_str = str(datetime.timedelta(seconds=int(eta_seconds)))
+                    # print('Epoch: [{0}/{1}][{2}/{3}]\t'
+                    #       'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
+                    #       'Data {data_time.val:.3f} ({data_time.avg:.3f})\t'
+                    #       'Loss {loss.val:.4f} ({loss.avg:.4f})\t'
+                    #       'Acc {acc.val:.2f} ({acc.avg:.2f})\t'
+                    #       'Lr {lr:.6f}\t'
+                    #       'eta {eta}'.format(
+                    #       epoch+1, max_epoch, batch_idx+1, num_batches,
+                    #       batch_time=batch_time,
+                    #       data_time=data_time,
+                    #       loss=losses,
+                    #       acc=accs,
+                    #       lr=self.optimizer.param_groups[0]['lr'],
+                    #       eta=eta_str
+                    #     )
+                    # )
+                    
 
-            if self.writer is not None:
-                n_iter = epoch * num_batches + batch_idx
-                self.writer.add_scalar('Train/Time', batch_time.avg, n_iter)
-                self.writer.add_scalar('Train/Data', data_time.avg, n_iter)
-                self.writer.add_scalar('Train/Loss', losses.avg, n_iter)
-                self.writer.add_scalar('Train/Acc', accs.avg, n_iter)
-                self.writer.add_scalar('Train/Lr', self.optimizer.param_groups[0]['lr'], n_iter)
-            
-            end = time.time()
+
+                if self.writer is not None:
+                    n_iter = epoch * num_batches + batch_idx
+                    self.writer.add_scalar('Train/Time', batch_time.avg, n_iter)
+                    self.writer.add_scalar('Train/Data', data_time.avg, n_iter)
+                    self.writer.add_scalar('Train/Loss', losses.avg, n_iter)
+                    self.writer.add_scalar('Train/Acc', accs.avg, n_iter)
+                    self.writer.add_scalar('Train/Lr', self.optimizer.param_groups[0]['lr'], n_iter)
+                
+                end = time.time()
+                pbar.update()

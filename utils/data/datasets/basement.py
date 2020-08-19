@@ -165,6 +165,7 @@ class Dataset(object):
                                'document to prepare this dataset'.format(self.__class__.__name__))
 
         mkdir_if_missing(dataset_dir)
+        
         fpath = osp.join(dataset_dir, osp.basename(dataset_url))
 
         print('Downloading {} dataset to "{}"'.format(self.__class__.__name__, dataset_dir))

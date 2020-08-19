@@ -29,7 +29,7 @@ def build_datamanager(cfg):
 
 def build_engine(cfg, datamanager, model, optimizer, scheduler):
 
-    engine = utils.engine.SeNetEngine(
+    engine = utils.engine.AENetEngine(
         datamanager,
         model,
         optimizer,
@@ -94,9 +94,10 @@ def main():
     datamanager = build_datamanager(cfg)
     
     print('Building model: {}'.format(cfg.model.name))
+    print('pids',datamanager._num_train_pids)
     model = utils.models.build_model(
         name=cfg.model.name,
-        num_classes=datamanager.num_train_pids,
+        num_classes=datamanager._num_train_pids,
         loss=cfg.loss.name,
         pretrained=cfg.model.pretrained,
         use_gpu=cfg.use_gpu
@@ -116,7 +117,7 @@ def main():
 
 
     if cfg.model.resume and check_isfile(cfg.model.resume):
-        args.start_epoch = resume_from_checkpoint(cfg.model.resume, model, optimizer=optimizer)
+        cfg.train.start_epoch = resume_from_checkpoint(cfg.model.resume, model, optimizer=optimizer)
 
     print('Building {}-engine for {}-reid'.format(cfg.loss.name, cfg.data.type))
     engine = build_engine(cfg, datamanager, model, optimizer, scheduler)

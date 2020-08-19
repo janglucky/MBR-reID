@@ -7,14 +7,14 @@ def get_default_config():
 
 
     # gpu
-    cfg.use_gpu = False
+    cfg.use_gpu = True
 
     # model
     cfg.model = CN()
     cfg.model.name = 'AENet'
     cfg.model.pretrained = False  # automatically load pretrained model weights if available
     cfg.model.load_weights = 'log/model.pth.tar-149'  # path to model weights
-    cfg.model.resume = ''  # path to checkpoint for resume training
+    cfg.model.resume = 'log/checkpoint.pth'  # path to checkpoint for resume training
 
     # data
     cfg.data = CN()
@@ -48,13 +48,13 @@ def get_default_config():
 
     # train
     cfg.train = CN()
-    cfg.train.evaluate_epoch = 120
+    cfg.train.evaluate_epoch = 1
     cfg.train.optim = 'sgd'
     cfg.train.lr = 3e-2
     cfg.train.weight_decay = 5e-4
     cfg.train.max_epoch = 320
     cfg.train.start_epoch = 0
-    cfg.train.batch_size = 32
+    cfg.train.batch_size = 128
     cfg.train.fixbase_epoch = 0  # number of epochs to fix base layers
     cfg.train.open_layers = ['classifier']  # layers for training while keeping others frozen
     cfg.train.staged_lr = False  # set different lr to different layers
@@ -102,7 +102,7 @@ def get_default_config():
     cfg.test.ranks = [1, 5, 10, 20]  # cmc ranks
     cfg.test.evaluate = False  # test only
     cfg.test.eval_freq = 10  # evaluation frequency (-1 means to only test after training)
-    cfg.test.start_eval = 120  # start to evaluate after a specific epoch
+    cfg.test.start_eval = 1  # start to evaluate after a specific epoch
     cfg.test.rerank = False  # use person re-ranking
     cfg.test.visrank = False  # visualize ranked results (only available when cfg.test.evaluate=True)
     cfg.test.visrank_topk = 10  # top-k ranks to visualize
